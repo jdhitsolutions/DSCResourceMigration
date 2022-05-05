@@ -103,7 +103,7 @@ foreach ($prop in $resource.properties) {
 
 #parse module file to get method code
 #TODO :Insert RETURN keyword
-#TODOI: Need to change non property variables to gloval scope
+#TODOI: Need to change non property variables to global scope
 
 $getFun = Get-DSCResourceFunction -Path $resource.path -Name Get-TargetResource
 $code.Add("[$($mof.name)] Get() {")
