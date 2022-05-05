@@ -1,4 +1,7 @@
 #this should run in windows PowerShell for now
+
+#first development pass
+
 [cmdletbinding()]
 Param($Name = "xHotFix")
 

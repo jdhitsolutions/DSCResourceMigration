@@ -1,5 +1,7 @@
 #this should run in windows PowerShell for now
 
+#Second development pass
+
 #convert a single resource
 
 [cmdletbinding()]
