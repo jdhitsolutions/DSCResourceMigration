@@ -1,12 +1,14 @@
-# DSC Resource Migration
+# DSC Resource Migration Accelerator
 
-This is a PowerShell module to convert script-based DSC resources to class-based resources. The DSC Resource module to be converted needs to be installed on your computer.
+This is a PowerShell module to help authors migrate __script-based__ DSC resources to class-based resources. The tooling in this module is not designed as a completely hands-free experience. DSC Resource authors should consider the tools in this module as *accelerators* for the migration process.
+
+The DSC Resource module to be converted needs to be installed on your computer.
 
 Code in this module should considered proof-of-concept and work-in-progress.
 
 ## Requirements
 
-The commands in this module are intended to run under Windows PowerShell 5.1 and with version 1.1 of the PSDesiredStateConfiguration module.
+The commands in this module are intended to run under __Windows PowerShell 5.1__ and with version 1.1 of the PSDesiredStateConfiguration module. The conversion code requires `Get-DSCResource` which fails in PowerShell 7 with v2.x of the PSDesiredStateConfiguration module.
 
 ## Demo
 
@@ -18,7 +20,7 @@ WARNING: Failed to find a Write property in C:\Program Files\WindowsPowerShell\M
 WARNING: Failed to find a Read property in C:\Program Files\WindowsPowerShell\Modules\ComputerManagementDsc\8.5.0\DSCResources\DSC_TimeZone\DSC_TimeZone.schema.mof. This may be by design.
 ```
 
-Paste into VS Code. Note that this resource is using the `Return` keyword in their MOF-based code so this conversion requires very little in the way of additional coding.
+Paste the output into VS Code. Note that this resource is using the `Return` keyword in their MOF-based code so this conversion requires very little in the way of additional coding. But this is not true for other resources.
 
 ```powershell
 $modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
@@ -91,18 +93,22 @@ The demonstration is only converting a single DSC resource from a module but it 
 
 These are issues that prevent code in this module from converting seamlessly, i.e. without any user intervention.
 
-+ The class methods need to use the `Return` keyword. I can't find a consistent technique to identify the line of code writing a result to the pipeline.
++ The class methods need to use the `Return` keyword. I can't find a consistent technique  using the AST to identify the line of code writing the `Get` result to the pipeline.
 + External variable references need to be revised to use `$script:`. For example, many Microsoft resources use localized message data. This is referred to in `$LocalizedData`. When used in a class method it needs to be `$script:LocalizedData`. In my testing, *some* DSC resources are already doing this and require no updates.
 
 Regardless of resolving any of these blockers, I would argue that the resource owner review and validate the migration process. The resource may be using deprecated PowerShell cmdlets, or there may be newer cmdlets and parameters. There is also no way to migrate Pester tests. Those may need to be upgraded to reflect the change to a class-based resource as well as migrating from previous versions of Pester.
 
 ## Design Decisions
 
-These are long-term design decisions.
+These are long-term design decisions that will determine what additional tooling this module will require.
 
-+ How do we want to organize multiple classes in a single module? Nested modules?
++ How do we want to organize multiple classes in a single module? Nested modules? Or is it one resource per module?
 + How do we manage friendly name vs real name for the class? There is no way to define a friendly name or alias for a DSC class-based resource.
 + How do we want to layout the new module folder structure?
 + How do we want to handle versioning? In my demo code I am generating a version number that is the next major version.
-+ Should we copy old Pester tests included in the original module to the new module?
++ Should we copy old Pester tests included in the original module to the new module? Old Pester tests may need to be re-factored for Pester v5.
 + Should we insert a code block that prevents the module from being loaded to force the author to review and update the new code?
++ Does code signing need to be taken into account?
++ How do we handle module dependencies? For example, the `SMBShare` resource in the `ComputerManagementDSC` module is running `Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')`.
+
+### Last Updated 27 May 2022

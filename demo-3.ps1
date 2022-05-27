@@ -1,4 +1,4 @@
-#this should run in windows PowerShell for now
+#this should run in windows PowerShell for now.
 
 #Third development pass
 
@@ -10,8 +10,8 @@ Param($Name = "xHotFix")
 Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
 Try {
 	Write-Verbose "Getting the most current version of DSC Resource $name"
-	$resource = Get-DscResource -Name $name -erroraction stop  |
-	Sort-Object version -Descending | Select-Object -first 1
+	$resource = Get-DscResource -Name $name -erroraction stop |
+	Sort-Object version -Descending | Select-Object -First 1
 }
 Catch {
 	Throw $_
@@ -21,7 +21,10 @@ $code = [System.Collections.Generic.list[string]]::New()
 $parent = Split-Path $resource.Path
 $mofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
 
-#friendly name vs offical class name
+#how do we want to handle friendly name vs official class name?
+
+#create a new version number that is the major version + 1
+#this could be used in the new module manifest
 $newversion = [version]::New($resource.Version.major + 1, 0, 0, 0)
 
 Write-Verbose "Getting non-TargetResource code"
@@ -36,7 +39,7 @@ Select-Object extent
 
 $other | Where-Object { $_.extent.text -notmatch "Export-ModuleMember" } |
 ForEach-Object {
-	$_.Extent.text | Foreach-Object {$code.Add($_)}
+	$_.Extent.text | ForEach-Object { $code.Add($_) }
 }
 
 Write-Verbose "Converting MOF from $mofpath"
@@ -88,7 +91,7 @@ Foreach ($p in $mof.properties) {
 
 #parse module file to get method code
 #TODO :Insert RETURN keyword
-#TODOI: Need to change non property variables to script scope
+#TODOI: Need to change non-property variables to script scope
 
 $getFun = Get-DSCResourceFunction -Path $resource.path -Name Get-TargetResource
 $code.Add("[$($mof.name)] Get() {")
@@ -123,8 +126,8 @@ $code.Add("} #close class")
 <# #get external files and functions
 get-functionname -Path $resource.path |
 Where-Object { $_ -notmatch "[(Get)|(Set)|(Test)]-TargetResource" } | ForEach-Object {
-	#save each function to a file
-	$code.Add( $(Get-DSCHelperFunction -Path $resource.path -Name $_))
+    #save each function to a file
+    $code.Add( $(Get-DSCHelperFunction -Path $resource.path -Name $_))
 } #>
 
 #insert mof
@@ -140,15 +143,14 @@ $code
 [ClassVersion("1.0.0.0"), FriendlyName("xHotfix")]
 class MSFT_xWindowsUpdate : OMI_BaseResource
 {
-	// We can have multiple versions of an update for a single ID, the indentifier is in the file,
-	// Therefore the file path should be the key
-	[key, Description("Specifies the path that contains the msu file for the hotfix installation.")] String Path;
-	[required, Description("Specifies the Hotfix ID.")] String Id;
-	[Write, Description("Specifies the location of the log that contains information from the installation.")] String Log;
-	[Write, Description("Specifies whether the hotfix needs to be installed or uninstalled."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-	[write, Description("Specifies the credential to use to authenticate to a UNC share if the path is on a UNC share."),EmbeddedInstance("MSFT_Credential")] string Credential;
+    // We can have multiple versions of an update for a single ID, the indentifier is in the file,
+    // Therefore the file path should be the key
+    [key, Description("Specifies the path that contains the msu file for the hotfix installation.")] String Path;
+    [required, Description("Specifies the Hotfix ID.")] String Id;
+    [Write, Description("Specifies the location of the log that contains information from the installation.")] String Log;
+    [Write, Description("Specifies whether the hotfix needs to be installed or uninstalled."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [write, Description("Specifies the credential to use to authenticate to a UNC share if the path is on a UNC share."),EmbeddedInstance("MSFT_Credential")] string Credential;
 };
-
 
 #>
 
