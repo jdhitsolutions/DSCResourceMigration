@@ -7,6 +7,10 @@
 [cmdletbinding()]
 Param($Name = "xHotFix")
 
+if ($IsCoreClr) {
+	Write-Warning "This must be run in Windows PowerShell 5.1"
+	return
+}
 Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
 Try {
 	Write-Verbose "Getting the most current version of DSC Resource $name"
