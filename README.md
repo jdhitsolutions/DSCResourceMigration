@@ -111,4 +111,4 @@ These are long-term design decisions that will determine what additional tooling
 + Does code signing need to be taken into account?
 + How do we handle module dependencies? For example, the `SMBShare` resource in the `ComputerManagementDSC` module is running `Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')`.
 
-### Last Updated 27 May 2022
+### Last Updated 23 June 2022
