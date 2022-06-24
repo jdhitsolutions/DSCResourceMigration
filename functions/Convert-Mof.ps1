@@ -1,3 +1,4 @@
+#convert schema.mof brute force
 Function Convert-Mof {
     [CmdletBinding()]
     Param(

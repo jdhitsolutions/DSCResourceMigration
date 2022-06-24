@@ -7,10 +7,10 @@
     RootModule           = 'DSCResourceMigration.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.5.0'
+    ModuleVersion        = '0.6.0'
 
     # Supported PSEditions
-    CompatiblePSEditions = 'Desktop'
+    CompatiblePSEditions = 'Desktop','Core'
 
     # ID used to uniquely identify this module
     GUID                 = '09763485-4b89-4325-959b-2bed47354905'
@@ -46,10 +46,10 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules = @()
+    RequiredModules = @( @{ ModuleName="PSDesiredStateConfiguration";RequiredVersion="2.0.5"})
 
     # Assemblies that must be loaded prior to importing this module
-    # RequiredAssemblies = @()
+    #RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
     # ScriptsToProcess = @()
@@ -65,7 +65,8 @@
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport    = 'Get-SchemaMofProperty', 'Get-FunctionName', 'Get-DSCResourceFunction',
-    'Get-DSCHelperFunction', 'Convert-Mof', 'Get-AST', 'Convert-VariableReference'
+    'Get-DSCHelperFunction', 'Convert-Mof', 'Get-AST', 'Convert-VariableReference','Get-SchemaMofPath',
+    'Convert-SchemaMofProperty','New-ClassDefinition'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = ''

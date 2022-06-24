@@ -5,16 +5,15 @@
 #convert a single resource
 
 [cmdletbinding()]
-Param($Name = "xHotFix")
+Param(
+	[string]$Name = "xHotFix",
+	[string]$modulename = "xWindowsUpdate" 
+	)
 
-if ($IsCoreClr) {
-	Write-Warning "This must be run in Windows PowerShell 5.1"
-	return
-}
 Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
 Try {
 	Write-Verbose "Getting the most current version of DSC Resource $name"
-	$resource = Get-DscResource -Name $name -erroraction stop |
+	$resource = Get-DscResource -Name $name -module $modulename -erroraction stop |
 	Sort-Object version -Descending | Select-Object -First 1
 }
 Catch {
@@ -95,7 +94,7 @@ Foreach ($p in $mof.properties) {
 
 #parse module file to get method code
 #TODO :Insert RETURN keyword
-#TODOI: Need to change non-property variables to script scope
+#TODO: Need to change non-property variables to script scope
 
 $getFun = Get-DSCResourceFunction -Path $resource.path -Name Get-TargetResource
 $code.Add("[$($mof.name)] Get() {")
