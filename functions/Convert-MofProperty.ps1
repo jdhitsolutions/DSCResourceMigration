@@ -1,5 +1,6 @@
 #convert schema.mof properties to a class
 
+
 Function Convert-SchemaMofProperty {
     [cmdletbinding()]
     [outputtype([String[]])]
@@ -17,7 +18,7 @@ Function Convert-SchemaMofProperty {
     Process {
         Write-Verbose "[$((Get-Date).TimeofDay) PROCESS] Processing $Path "
         $definition = [system.collections.generic.list[string]]::new()
-        $mofSchemas = [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::ReadCimSchemaMof($mofPath)
+        $mofSchemas = [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::ReadCimSchemaMof($Path)
         #There may be multiple schemas so select the correct one.
         $mofSchema = $mofSchemas.where({$_.cimclassname -eq $resource.ResourceType})
         $classname = $mofSchema.cimclassname
@@ -39,6 +40,11 @@ Function Convert-SchemaMofProperty {
                     "StringArray" { $propType = "String[]" }
                     default { $propType = $p.ReferenceClassName }
                 }
+            }
+            elseif ( $p.qualifiers.name -match "valuemap"  ) {
+                #if value map exists then an enum will be defined and the property type
+                #should match the enum
+                $proptype = $p.Name
             }
             else {
                 Switch ($p.cimType) {

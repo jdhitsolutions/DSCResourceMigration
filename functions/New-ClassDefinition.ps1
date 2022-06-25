@@ -11,7 +11,6 @@ Function New-ClassDefinition {
         #initialize a collection of strings for the output. This could be the contents
         #of a new .psm1 file.
         $code = [System.Collections.Generic.list[string]]::New()
-        $code.Add("[DSCResource()]")
     } #begin
 
     Process {
@@ -20,13 +19,20 @@ Function New-ClassDefinition {
         Try {
             Write-Verbose "Getting the most current version of DSC Resource $name"
             $resource = Get-DscResource -Name $name -Module $module -ErrorAction stop |
-                Sort-Object version -Descending | Select-Object -First 1
+            Sort-Object version -Descending | Select-Object -First 1
         }
         Catch {
             Throw $_
         }
         #get mof path
         $mofPath = Get-SchemaMofPath -name $Name -module $module
+        #get any enums
+        [string[]]$enums = New-DSCEnum -path $mofPath
+        if ($enums) {
+            $code.AddRange($enums)
+        }
+        #start the class definition
+        $code.Add("[DSCResource()]")
         if ($mofPath) {
             $parsedMof = Convert-SchemaMofProperty $mofpath
             $code.Add("Class $($parsedMof.ClassName) {")
@@ -75,7 +81,6 @@ Function New-ClassDefinition {
 
     End {
         Write-Verbose "[$((Get-Date).TimeofDay) END    ] Ending $($myinvocation.mycommand)"
-
     } #end
 
 } #close New-ClassDefinition

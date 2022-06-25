@@ -14,9 +14,9 @@ The commands in this module rely on `Get-DSCResource` from the  `PSDesiredStateC
 Get-DSCResource -name xhotfix -module xWindowsUpdate
 ```
 
-As long as any code in this module that invokes `Get-DSCResource`, there shouldn't be any problem.
+As long as any code in this module that invokes `Get-DSCResource`, there shouldn't be any problem. The `DSCResourceMigration` module has a dependency on `@{ModuleName="PSDesiredStateConfiguration";RequiredVersion="2.0.5"}`.
 
-## Demo
+## Demos
 
 The current demo script, `demo-4.ps1`, can be run from the root of this module. Specify the name of a DSC Resource and its module. The output is code that could be inserted into a new `.psm1` file. It would also not be difficult to redirect different sections to different files.
 
@@ -110,6 +110,22 @@ class DSC_TimeZone : OMI_BaseResource
 
 The demonstration is only converting a single DSC resource from a module but it shouldn't be difficult to scale out depending on design decisions. See below.
 
+### Migrate.ps1
+
+You will also find `Migrate.ps1`. This is a more full-featured proof-of-concept.
+
+```powershell
+.\Migrate.ps1 -Name timezone  -module @{ModuleName="computermanagementdsc";requiredVersion="8.5.0"} -DestinationPath d:\temp\xtimezone -Verbose
+```
+
+With this script you specify the path for the new module. The script will:
+
++ Create a directory structure
++ Generate a class-based psm1 file, along with other non-function code.
++ Export non-targetresource functions to separate files under a functions subfolder
++ Copy the `Modules` directory from the source module root to the target destination. This should help mitigate the child module issue.
++ Create a module manifest with the exported DSC resource.
+
 ## Blockers
 
 These are issues that prevent code in this module from converting seamlessly, i.e. without any user intervention.
@@ -131,6 +147,6 @@ These are long-term design decisions that will determine what additional tooling
 + Should we copy old Pester tests included in the original module to the new module? Old Pester tests may need to be re-factored for Pester v5.
 + Should we insert a code block that prevents the module from being loaded to force the author to review and update the new code?
 + Does code signing need to be taken into account?
-+ How do we handle module dependencies? For example, the `SMBShare` resource in the `ComputerManagementDSC` module is running `Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')`.
++ How do we handle module dependencies? For example, the `SMBShare` resource in the `ComputerManagementDSC` module is running `Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')`. In my demo `Migrate.ps1` file I can copy the source folders if the original module has a `Modules` sub-folder.
 
-### Last Updated 24 June 2022
+### Last Updated 25 June 2022
