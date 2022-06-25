@@ -4,7 +4,7 @@ This is a PowerShell module to help authors migrate __script-based__ DSC resourc
 
 The DSC Resource module to be converted needs to be installed on your computer.
 
-Code in this module should considered proof-of-concept and work-in-progress.
+Code in this module should considered __proof-of-concept__ and work-in-progress.
 
 ## Requirements
 
