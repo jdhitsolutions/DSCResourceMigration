@@ -7,10 +7,10 @@
     RootModule           = 'DSCResourceMigration.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.7.0'
+    ModuleVersion        = '0.8.0'
 
     # Supported PSEditions
-    CompatiblePSEditions = 'Desktop','Core'
+    CompatiblePSEditions = 'Desktop', 'Core'
 
     # ID used to uniquely identify this module
     GUID                 = '09763485-4b89-4325-959b-2bed47354905'
@@ -31,12 +31,12 @@
     PowerShellVersion    = '5.1'
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules = @( @{ ModuleName="PSDesiredStateConfiguration";RequiredVersion="2.0.5"})
+    RequiredModules      = @( @{ ModuleName = "PSDesiredStateConfiguration"; RequiredVersion = "2.0.5" })
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport    = 'Get-SchemaMofProperty', 'Get-FunctionName', 'Get-DSCResourceFunction',
-    'Get-DSCHelperFunction', 'Convert-Mof', 'Get-AST', 'Convert-VariableReference','Get-SchemaMofPath',
-    'Convert-SchemaMofProperty','New-ClassDefinition','New-DSCEnum'
+    'Get-DSCHelperFunction', 'Convert-Mof', 'Get-AST', 'Convert-VariableReference', 'Get-SchemaMofPath',
+    'Convert-SchemaMofProperty', 'New-ClassDefinition', 'New-DSCEnum'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = ''

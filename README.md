@@ -18,7 +18,11 @@ As long as any code in this module that invokes `Get-DSCResource`, there shouldn
 
 ## Demos
 
-The current demo script, `demo-4.ps1`, can be run from the root of this module. Specify the name of a DSC Resource and its module. The output is code that could be inserted into a new `.psm1` file. It would also not be difficult to redirect different sections to different files.
+This module contains several demonstration scripts. These should be considered proof-of-concept. The scripts are intended to be run from the root of this module.
+
+### Demo-4.ps1
+
+The current demo script, `demo-4.ps1`, can be run from the root of this module. Specify the name of a DSC Resource and its module. The output is code that could be inserted into a new `.psm1` file. It would also not be difficult to redirect different sections to different files. (*See the migration sample scripts*)
 
 ```powershell
 PS C:\scripts\DSCResourceMigration>.\demo-4 -Name timezone -Module @{ModuleName="computermanagementdsc";RequiredVersion="8.5.0"} | Set-Clipboard
@@ -126,6 +130,99 @@ With this script you specify the path for the new module. The script will:
 + Copy the `Modules` directory from the source module root to the target destination. This should help mitigate the child module issue.
 + Create a module manifest with the exported DSC resource.
 
+### Migrate-Module.ps1
+
+This script will migrate an entire MOF based DSC Resource module to a target location. The script will create a new directory structure. Every DSC resource will be exported to its own file under its own directory under a module Classes. Supporting functions for each resource will be exported to separate files under each class folder. The idea is to try an make each resource as self-contained as possible.
+
+```powershell
+.\Migrate-module.ps1 -Module xwindowsupdate -DestinationPath d:\temp\WindowsUpdateDsc
+```
+
+The converted module:
+
+```DOS
+
+    Directory: D:\temp\WindowsUpdateDsc
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    d----           6/27/2022 12:11 PM               classes
+    d----           6/27/2022 12:11 PM               docs
+    d----           6/27/2022 12:11 PM               en-us
+    d----           6/27/2022 12:11 PM               functions
+    d----           6/27/2022 12:11 PM               samples
+    d----           6/27/2022 12:11 PM               tests
+    -a---           6/27/2022 12:11 PM           4259 WindowsUpdateDsc.psd1
+    -a---           6/27/2022 12:11 PM             78 WindowsUpdateDsc.psm1
+
+        Directory: D:\temp\WindowsUpdateDsc\classes
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    d----           6/27/2022 12:11 PM               MSFT_xMicrosoftUpdate
+    d----           6/27/2022 12:11 PM               MSFT_xWindowsUpdate
+    d----           6/27/2022 12:11 PM               MSFT_xWindowsUpdateAgent
+
+        Directory: D:\temp\WindowsUpdateDsc\classes\MSFT_xMicrosoftUpdate
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    d----           6/27/2022 12:11 PM               functions
+    -a---           6/27/2022 12:11 PM           3336 MSFT_xMicrosoftUpdate.ps1
+
+        Directory: D:\temp\WindowsUpdateDsc\classes\MSFT_xMicrosoftUpdate\functions
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    -a---           6/27/2022 12:11 PM            136 Write-DeprecatedMessage.ps1
+
+        Directory: D:\temp\WindowsUpdateDsc\classes\MSFT_xWindowsUpdate
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    d----           6/27/2022 12:11 PM               functions
+    -a---           6/27/2022 12:11 PM           8491 MSFT_xWindowsUpdate.ps1
+
+        Directory: D:\temp\WindowsUpdateDsc\classes\MSFT_xWindowsUpdate\functions
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    -a---           6/27/2022 12:11 PM            379 New-InvalidArgumentException.ps1
+    -a---           6/27/2022 12:11 PM           1736 Test-StandardArguments.ps1
+    -a---           6/27/2022 12:11 PM           4347 Test-WindowsUpdatePath.ps1
+    -a---           6/27/2022 12:11 PM            158 Trace-Message.ps1
+
+        Directory: D:\temp\WindowsUpdateDsc\classes\MSFT_xWindowsUpdateAgent
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    d----           6/27/2022 12:11 PM               functions
+    -a---           6/27/2022 12:11 PM          10051 MSFT_xWindowsUpdateAgent.ps1
+
+        Directory: D:\temp\WindowsUpdateDsc\classes\MSFT_xWindowsUpdateAgent\functions
+
+   Mode                 LastWriteTime         Length Name
+   ----                 -------------         ------ ----
+    -a---           6/27/2022 12:11 PM            337 Add-WuaService.ps1
+    -a---           6/27/2022 12:11 PM             92 Get-WuaAu.ps1
+    -a---           6/27/2022 12:11 PM            475 Get-WuaAuNotificationLevel.ps1
+    -a---           6/27/2022 12:11 PM            761 Get-WuaAuNotificationLevelInt.ps1
+    -a---           6/27/2022 12:11 PM             67 Get-WuaAuSettings.ps1
+    -a---           6/27/2022 12:11 PM            355 Get-WuaRebootRequired.ps1
+    -a---           6/27/2022 12:11 PM           1198 get-WuaSearcher.ps1
+    -a---           6/27/2022 12:11 PM           2579 Get-WuaSearchString.ps1
+    -a---           6/27/2022 12:11 PM            106 Get-WuaServiceManager.ps1
+    -a---           6/27/2022 12:11 PM             94 Get-WuaSession.ps1
+    -a---           6/27/2022 12:11 PM            100 Get-WuaSystemInfo.ps1
+    -a---           6/27/2022 12:11 PM           2164 Get-WuaWrapper.ps1
+    -a---           6/27/2022 12:11 PM            389 Invoke-WuaDownloadUpdates.ps1
+    -a---           6/27/2022 12:11 PM            381 Invoke-WuaInstallUpdates.ps1
+    -a---           6/27/2022 12:11 PM            217 Remove-WuaService.ps1
+    -a---           6/27/2022 12:11 PM            476 Set-WuaAuNotificationLevel.ps1
+    -a---           6/27/2022 12:11 PM            665 Test-SearchResult.ps1
+
+```
+
 ## Blockers
 
 These are issues that prevent code in this module from converting seamlessly, i.e. without any user intervention.
@@ -149,4 +246,4 @@ These are long-term design decisions that will determine what additional tooling
 + Does code signing need to be taken into account?
 + How do we handle module dependencies? For example, the `SMBShare` resource in the `ComputerManagementDSC` module is running `Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')`. In my demo `Migrate.ps1` file I can copy the source folders if the original module has a `Modules` sub-folder.
 
-### Last Updated 25 June 2022
+### Last Updated 27 June 2022
