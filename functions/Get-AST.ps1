@@ -1,6 +1,6 @@
 Function Get-AST {
-    [cmdletbinding()]
-    Param([string]$Path)
+    [CmdletBinding()]
+    Param([String]$Path)
 
     New-Variable astTokens -Force -WhatIf:$false
     New-Variable astErr -Force -WhatIf:$false

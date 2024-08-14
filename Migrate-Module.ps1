@@ -10,17 +10,17 @@ Param(
     [Parameter(Mandatory, HelpMessage = "The name of the module for the DSC resource. Use fully-qualified name to specify a version.")]
     [object]$Module,
     [Parameter(Mandatory, HelpMessage = "The destination path for the new module, including the new module name.")]
-    [string]$DestinationPath,
+    [String]$DestinationPath,
     [version]$NewVersion = "0.1.0"
 )
 
-Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
+Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 
 $newName = Split-Path -Path $DestinationPath -Leaf
 $rootModule = Join-Path -Path $DestinationPath -ChildPath "$newname.psm1"
 
 #get the source module root path to check for supporting modules
-if ($module -is [string]) {
+if ($module -is [String]) {
     $modroot = Get-Module -Name $Module -ListAvailable -OutVariable mod | Split-Path
 }
 else {
@@ -77,8 +77,8 @@ if (Test-Path "$modroot\modules" ) {
 Write-Verbose "Creating $rootModule"
 #dot source the class files to the psm1 file
 @"
-Get-Childitem -path `$PSScriptRoot\classes  |
-Foreach-Object {. `$_.fullname}
+Get-ChildItem -path `$PSScriptRoot\classes  |
+ForEach-Object {. `$_.FullName}
 "@ | Out-File -FilePath $rootModule
 
 #convert each resource into a class in its own folder
@@ -88,8 +88,8 @@ foreach ($Name in $Resources ) {
     Write-Verbose "Converting MOF for $name from to Class"
     Write-Verbose "Creating a folder for the class"
     $classFolder = New-Item -Path "$DestinationPath\Classes" -Name $Name -ItemType Directory -Force
-    $classFile = Join-Path -Path $classFolder.fullname -ChildPath "$name.ps1"
-    $classFunctions = New-Item -Name functions -Path $classFolder.fullName -ItemType Directory -Force
+    $classFile = Join-Path -Path $classFolder.FullName -ChildPath "$name.ps1"
+    $classFunctions = New-Item -Name functions -Path $classFolder.FullName -ItemType Directory -Force
 
     New-ClassDefinition -name $name -module $module | Out-File -FilePath $classFile
 
@@ -99,7 +99,7 @@ foreach ($Name in $Resources ) {
     #this could be turned into a function
     $resource = Get-DscResource -Name $Name -Module $module | Select-Object -First 1
     $ast = Get-AST -path $resource.path
-    $found = $ast.findall({ $args[0] -is [System.Management.Automation.Language.Ast] }, $true)
+    $found = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.Ast] }, $true)
     $h = $found | Group-Object { $_.GetType().Name } -AsHashTable -AsString
 
     $other = $h["NamedBlockAST"][0].statements |
@@ -110,7 +110,7 @@ foreach ($Name in $Resources ) {
     $funs = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) |
     Where-Object { $_.name -notmatch "targetResource" }
     foreach ($fun in $funs) {
-        $fpath = Join-Path -Path $classFunctions.fullname -ChildPath "$($fun.name).ps1"
+        $fpath = Join-Path -Path $classFunctions.FullName -ChildPath "$($fun.name).ps1"
         Write-Verbose "Exporting $fpath"
         $fun.Extent.text | Out-File -FilePath $fpath -Force
     }
@@ -125,17 +125,17 @@ foreach ($Name in $Resources ) {
     @"
 
 #dot source supporting functions
-Get-ChildItem `$PSScriptroot\functions\*.ps1 | Foreach-Object { . `$_.fullname}
+Get-ChildItem `$PSScriptRoot\functions\*.ps1 | ForEach-Object { . `$_.FullName}
 
 "@ | Out-File -FilePath $classfile -Append
 
     #append  a copy of the original schema.mof to the new class .ps1 file
     Write-Verbose "Creating a copy of the original schema.mof"
-    $mofPath = Get-SchemaMofPath -name $Name -module $module
+    $MofPath = Get-SchemaMofPath -name $Name -module $module
     @"
 <#
 original shema.mof
-$( Get-Content -Path $mofPath | Out-String)
+$( Get-Content -Path $MofPath | Out-String)
 #>
 "@  | Out-File -FilePath $classfile -Append
 

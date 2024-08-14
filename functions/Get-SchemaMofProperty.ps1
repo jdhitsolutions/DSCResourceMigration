@@ -4,12 +4,12 @@ Function Get-SchemaMofProperty {
         [parameter(Position = 0, Mandatory, HelpMessage = "Full path to the schema mof file")]
         [ValidateNotNullOrEmpty()]
         [ValidatePattern("\.mof$")]
-        [string]$Path,
+        [String]$Path,
         [Parameter(HelpMessage = "Specify the MOF property type")]
         [ValidateSet("Key", "Required", "Read", "Write")]
-        [string]$Type = "Key"
+        [String]$Type = "Key"
     )
-    Write-Verbose "Starting $($myinvocation.MyCommand)"
+    Write-Verbose "Starting $($MyInvocation.MyCommand)"
     Write-Verbose "Getting the schema mof $type property from $Path"
     [regex]$rxKey = "\[$Type.*\s(?<prop>(\w+)(?=;))"
     Write-Verbose "Using pattern $rxKey"
@@ -17,7 +17,7 @@ Function Get-SchemaMofProperty {
     if ($selected) {
         foreach ($item in $selected) {
             Write-Verbose "Parsing $($item.line)"
-            [pscustomobject]@{
+            [PSCustomObject]@{
                 DSCType      = $Type
                 PropertyType = [System.Text.RegularExpressions.Regex]::Match($item.line, "(?<=\]\s)\w+(?=\s)").value
                 PropertyName = [System.Text.RegularExpressions.Regex]::Match($item.line, "\w+(?=;$)").value

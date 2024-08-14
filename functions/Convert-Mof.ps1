@@ -10,14 +10,14 @@ Function Convert-Mof {
         )]
         [ValidateScript({ Test-Path $_ })]
         [ValidatePattern("\.mof")]
-        [string]$Path
+        [String]$Path
     )
     Begin {
-        Write-Verbose "[$((Get-Date).TimeofDay) BEGIN] Starting $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) BEGIN] Starting $($MyInvocation.MyCommand)"
         $properties = [System.Collections.Generic.list[object]]::new()
     } #begin
     Process {
-        Write-Verbose "[$((Get-Date).TimeofDay) PROCESS] Processing $Path"
+        Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Processing $Path"
         $mof = Get-Content $Path
         #get class name
         [regex]$rxClass = '(?<=class\s)\w+'
@@ -27,14 +27,14 @@ Function Convert-Mof {
         $friendly = $rxFriendly.match($mof).value
         #get version
         [regex]$rxVersion = '(?<=ClassVersion\(.)(\d+(\.))+\d+?'
-        $version = $rxversion.match($mof).value
+        $version = $rxVersion.match($mof).value
         #read mof for keys
         "Key", "Required", "Write", "Read" | ForEach-Object {
             # $properties.Add( $(Get-SchemaMofProperty -Path $path -type $_))
             Get-SchemaMofProperty -Path $path -type $_ | ForEach-Object { $properties.Add($_) }
         }
 
-        [pscustomobject]@{
+        [PSCustomObject]@{
             Name         = $name
             FriendlyName = $friendly
             Properties   = $properties
@@ -43,7 +43,7 @@ Function Convert-Mof {
 
     } #process
     End {
-        Write-Verbose "[$((Get-Date).TimeofDay) END    ] Ending $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
 
     } #end
 }
@@ -70,7 +70,7 @@ class CompanyRSAT : OMI_BaseResource
 };
 
 /*
-see https://docs.microsoft.com/en-us/powershell/scripting/dsc/resources/authoringresourcemof?view=powershell-5.1
+see https://docs.microsoft.com/en-us/PowerShell/scripting/dsc/resources/authoringresourcemof?view=PowerShell-5.1
 for guidance on defining the MOF
 */
 

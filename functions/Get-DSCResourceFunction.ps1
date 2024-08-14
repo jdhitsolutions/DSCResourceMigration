@@ -1,7 +1,7 @@
 
 #export the Get/Set/Test script block from a DSC Resource function
 Function Get-DSCResourceFunction {
-    [cmdletbinding()]
+    [CmdletBinding()]
     Param(
         [Parameter(Position = 0, Mandatory, HelpMessage = "Specify the .ps1 or .psm1 file with defined functions.")]
         [ValidateScript({
@@ -20,23 +20,23 @@ Function Get-DSCResourceFunction {
                     $False
                 }
             })]
-        [string]$Path,
+        [String]$Path,
         [Parameter(Mandatory, HelpMessage = "Specify a function by name")]
         [string[]]$Name
     )
     Begin {
-        Write-Verbose "[$((Get-Date).TimeofDay) BEGIN  ] Starting $($myinvocation.mycommand)"
-        $body = [System.Collections.Generic.list[string]]::new()
+        Write-Verbose "[$((Get-Date).TimeOfDay) BEGIN  ] Starting $($MyInvocation.MyCommand)"
+        $body = [System.Collections.Generic.list[String]]::new()
     } #begin
 
     Process {
         $path = Convert-Path -Path $path
-        Write-Verbose "[$((Get-Date).TimeofDay) PROCESS] Getting Function $function from $Path "
+        Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Getting Function $function from $Path "
         $AST = Get-AST $path
 
         $functions = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -AND $args[0].Name -eq $Name }, $true)
         if ($functions.count -gt 0) {
-            Write-Verbose "[$((Get-Date).TimeofDay) PROCESS] Processing $($functions.name)"
+            Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Processing $($functions.name)"
             ($functions.body.BeginBlock.statements.extent.text).foreach({ $body.Add("$_`n") })
             ($functions.body.ProcessBlock.statements.extent.text).foreach({ $body.Add("$_`n") })
             ($functions.body.EndBlock.statements.extent.text).foreach({ $body.Add("$_`n") })
@@ -53,7 +53,7 @@ Function Get-DSCResourceFunction {
     } #process
 
     End {
-        Write-Verbose "[$((Get-Date).TimeofDay) END    ] Ending $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
     } #end
 
 } #close

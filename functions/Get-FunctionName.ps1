@@ -1,7 +1,7 @@
 Function Get-FunctionName {
-    [cmdletbinding()]
+    [CmdletBinding()]
     [alias('gfn')]
-    [outputType("string", "PSFunctionName")]
+    [OutputType("string", "PSFunctionName")]
     Param(
         [Parameter(
             Position = 0,
@@ -26,19 +26,19 @@ Function Get-FunctionName {
                 }
             })]
         [alias("pspath")]
-        [string]$Path,
+        [String]$Path,
         [Parameter(HelpMessage = "List all detected function names.")]
-        [switch]$All,
+        [Switch]$All,
         [Parameter(HelpMessage = "Write a rich detailed object to the pipeline.")]
-        [switch]$Detailed
+        [Switch]$Detailed
     )
 
     Begin {
-        Write-Verbose "[$((Get-Date).TimeofDay) BEGIN  ] Starting $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) BEGIN  ] Starting $($MyInvocation.MyCommand)"
     } #begin
     Process {
         $Path = Convert-Path -Path $path
-        Write-Verbose "[$((Get-Date).TimeofDay) PROCESS] Parsing $path for functions."
+        Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Parsing $path for functions."
         $AST = Get-AST $path
 
         #parse out functions using the AST
@@ -52,7 +52,7 @@ Function Get-FunctionName {
             }
             if ($Detailed) {
                 foreach ($item in $($out | Sort-Object)) {
-                    [pscustomobject]@{
+                    [PSCustomObject]@{
                         PSTypeName = "PSFunctionName"
                         Name       = $item
                         Path       = $Path
@@ -68,6 +68,6 @@ Function Get-FunctionName {
         }
     } #process
     End {
-        Write-Verbose "[$((Get-Date).TimeofDay) END    ] Ending $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
     } #end
 } #close function

@@ -1,20 +1,20 @@
 Function New-ClassDefinition {
-    [cmdletbinding()]
+    [CmdletBinding()]
     Param(
         [Parameter(ValueFromPipelineByPropertyName, Mandatory, HelpMessage = "Enter the DSC Resource name")]
-        [string]$Name,
+        [String]$Name,
         [Parameter(ValueFromPipelineByPropertyName, Mandatory, HelpMessage = "Enter the DSC module name for the resource")]
         [object]$Module
     )
     Begin {
-        Write-Verbose "[$((Get-Date).TimeofDay) BEGIN  ] Starting $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) BEGIN  ] Starting $($MyInvocation.MyCommand)"
         #initialize a collection of strings for the output. This could be the contents
         #of a new .psm1 file.
-        $code = [System.Collections.Generic.list[string]]::New()
+        $code = [System.Collections.Generic.list[String]]::New()
     } #begin
 
     Process {
-        Write-Verbose "[$((Get-Date).TimeofDay) PROCESS] Converting DSC Resource $Name"
+        Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Converting DSC Resource $Name"
         #get the resource
         Try {
             Write-Verbose "Getting the most current version of DSC Resource $name"
@@ -25,16 +25,16 @@ Function New-ClassDefinition {
             Throw $_
         }
         #get mof path
-        $mofPath = Get-SchemaMofPath -name $Name -module $module
+        $MofPath = Get-SchemaMofPath -name $Name -module $module
         #get any enums
-        [string[]]$enums = New-DSCEnum -path $mofPath
+        [string[]]$enums = New-DSCEnum -path $MofPath
         if ($enums) {
             $code.AddRange($enums)
         }
         #start the class definition
         $code.Add("[DSCResource()]")
-        if ($mofPath) {
-            $parsedMof = Convert-SchemaMofProperty $mofpath
+        if ($MofPath) {
+            $parsedMof = Convert-SchemaMofProperty $MofPath
             $code.Add("Class $($parsedMof.ClassName) {")
             $code.AddRange([string[]]$($parsedMof.Properties))
         }
@@ -80,7 +80,7 @@ Function New-ClassDefinition {
     } #process
 
     End {
-        Write-Verbose "[$((Get-Date).TimeofDay) END    ] Ending $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
     } #end
 
 } #close New-ClassDefinition

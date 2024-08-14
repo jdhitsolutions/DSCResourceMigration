@@ -4,33 +4,33 @@
 
 #convert a single resource
 
-[cmdletbinding()]
+[CmdletBinding()]
 Param($Name = "xHotFix")
 
-Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
+Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 
-$code = [System.Collections.Generic.list[string]]::New()
+$code = [System.Collections.Generic.list[String]]::New()
 Write-Verbose "Getting DSC Resource $name"
 $resource = Get-DscResource -Name $name
 $parent = Split-Path $resource.Path
-$mofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
+$MofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
 
-#friendly name vs offical class name
-$newversion = [version]::New($resource.Version.major + 1, 0, 0, 0)
+#friendly name vs official class name
+$NewVersion = [version]::New($resource.Version.major + 1, 0, 0, 0)
 
-$Mof = Convert-Mof $mofpath
+$Mof = Convert-Mof $MofPath
 
 Write-Verbose "Getting localized data"
 $ast = Get-AST -path $resource.path
-$ds = $ast.findall({ $args[0] -is [System.Management.Automation.Language.DataStatementAst] }, $true)
+$ds = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.DataStatementAst] }, $true)
 $code.Add($ds.extent.text)
 
 #TODO: parse other module code
 
 # need to identify enums
-$mof.properties.where({ $_.valuemap }).foreach({
+$mof.properties.where({ $_.ValueMap }).foreach({
         $code.Add("enum $($_.PropertyName) {")
-        Foreach ($v in $_.valuemap) {
+        Foreach ($v in $_.ValueMap) {
             $code.Add("  $($v)")
         }
         $code.add("}`n")
@@ -61,26 +61,26 @@ Foreach ($p in $mof.properties) {
     $code.Add("[DscProperty($dscProperty)]")
 
     if ($p.ValueMap.count -gt 1) {
-        $ptype = "[$($p.PropertyName)]"
+        $pType = "[$($p.PropertyName)]"
     }
     else {
-        $ptype = "[$($p.PropertyType)]"
+        $pType = "[$($p.PropertyType)]"
     }
     #insert the description as a comment
     $code.Add("# $($p.Description)")
-    $code.Add("  $ptype`$$($p.PropertyName)`n")
+    $code.Add("  $pType`$$($p.PropertyName)`n")
 }
 
 <# #get key property
-Write-Verbose "Getting key property from $mofPath"
-$key = Get-SchemaMofProperty -Path $mofPath -type key -Verbose
-Write-Verbose "Key property is $($key.propertyname)"
+Write-Verbose "Getting key property from $MofPath"
+$key = Get-SchemaMofProperty -Path $MofPath -type key -Verbose
+Write-Verbose "Key property is $($key.PropertyName)"
 
 
 #need to get default parameter values from script
 foreach ($prop in $resource.properties) {
     Write-Verbose "Processing property $($prop.name)"
-    if ($prop.name -eq $key.propertyname) {
+    if ($prop.name -eq $key.PropertyName) {
         $dscProperty = "Key"
     }
     elseif ($prop.IsMandatory) {
@@ -92,18 +92,18 @@ foreach ($prop in $resource.properties) {
     $code.Add("[DscProperty($dscProperty)]")
 
     if ($prop.Values.count -gt 1) {
-        $ptype = "[$($prop.Name)]"
+        $pType = "[$($prop.Name)]"
     }
     else {
-        $ptype = $prop.PropertyType
+        $pType = $prop.PropertyType
     }
-    $code.Add("  $ptype`$$($prop.Name)`n")
+    $code.Add("  $pType`$$($prop.Name)`n")
 
 } #foreach #>
 
 #parse module file to get method code
 #TODO :Insert RETURN keyword
-#TODOI: Need to change non property variables to global scope
+#TODO: Need to change non property variables to global scope
 
 $getFun = Get-DSCResourceFunction -Path $resource.path -Name Get-TargetResource
 $code.Add("[$($mof.name)] Get() {")
@@ -136,7 +136,7 @@ $code.Add("} #close Test method`n")
 $code.Add("} #close class")
 
 #get external files and functions
-get-functionname -Path $resource.path |
+Get-FunctionName -Path $resource.path |
 Where-Object { $_ -notmatch "[(Get)|(Set)|(Test)]-TargetResource" } | ForEach-Object {
     #save each function to a file
     $code.Add( $(Get-DSCHelperFunction -Path $resource.path -Name $_))
@@ -145,7 +145,7 @@ Where-Object { $_ -notmatch "[(Get)|(Set)|(Test)]-TargetResource" } | ForEach-Ob
 #insert mof
 $code.add("<#")
 $code.add("original schema.mof")
-Get-Content $mofpath | ForEach-Object { $code.add($_) }
+Get-Content $MofPath | ForEach-Object { $code.add($_) }
 $code.add("#>")
 
 $code

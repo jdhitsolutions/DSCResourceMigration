@@ -1,10 +1,10 @@
 Function Convert-VariableReference {
     #convert variable references to $this.<name> to support class methods
-    [cmdletbinding()]
+    [CmdletBinding()]
     Param(
         [Parameter(Position = 0, Mandatory, HelpMessage = "Enter the variable name without the $ like Path")]
         [ValidateNotNullOrEmpty()]
-        [string]$VariableName,
+        [String]$VariableName,
         [Parameter(Mandatory, HelpMessage = "What is the code block to be updated.")]
         [ValidateNotNullOrEmpty()]
         [string[]]$CodeBlock

@@ -2,28 +2,28 @@
 
 #first development pass
 
-[cmdletbinding()]
+[CmdletBinding()]
 Param($Name = "xHotFix")
 
 # [Microsoft.PowerShell.DesiredStateConfiguration.DscResourcePropertyInfo]::new()
 
 #create destination path and folder structure
 
-$code = [System.Collections.Generic.list[string]]::New()
+$code = [System.Collections.Generic.list[String]]::New()
 
-Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
+Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 
-#friendly name vs offical class name
-$newversion = [version]::New($resource.Version.major + 1, 0, 0, 0)
+#friendly name vs official class name
+$NewVersion = [version]::New($resource.Version.major + 1, 0, 0, 0)
 
 Write-Verbose "Getting DSC Resource $name"
 $resource = Get-DscResource -Name $name
 $parent = Split-Path $resource.Path
-$mofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
+$MofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
 
 Write-Verbose "Getting localized data"
 $ast = Get-AST -path $resource.path
-$ds = $ast.findall({ $args[0] -is [System.Management.Automation.Language.DataStatementAst] }, $true)
+$ds = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.DataStatementAst] }, $true)
 $code.Add($ds.extent.text)
 
 # need to identify enums
@@ -36,16 +36,16 @@ $resource.properties.where({ $_.values }).foreach({
     })
 
 #get key property
-Write-Verbose "Getting key property from $mofPath"
-$key = Get-SchemaMofProperty -Path $mofPath -type key -Verbose
-Write-Verbose "Key property is $($key.propertyname)"
+Write-Verbose "Getting key property from $MofPath"
+$key = Get-SchemaMofProperty -Path $MofPath -type key -Verbose
+Write-Verbose "Key property is $($key.PropertyName)"
 $code.Add("[DSCResource()]")
 $code.add("Class $name {")
 
 #need to get default parameter values from script
 foreach ($prop in $resource.properties) {
     Write-Verbose "Processing property $($prop.name)"
-    if ($prop.name -eq $key.propertyname) {
+    if ($prop.name -eq $key.PropertyName) {
         $dscProperty = "Key"
     }
     elseif ($prop.IsMandatory) {
@@ -57,12 +57,12 @@ foreach ($prop in $resource.properties) {
     $code.Add("[DscProperty($dscProperty)]")
 
     if ($prop.Values.count -gt 1) {
-        $ptype = "[$($prop.Name)]"
+        $pType = "[$($prop.Name)]"
     }
     else {
-        $ptype = $prop.PropertyType
+        $pType = $prop.PropertyType
     }
-    $code.Add("  $ptype`$$($prop.Name)`n")
+    $code.Add("  $pType`$$($prop.Name)`n")
 
 } #foreach
 
@@ -100,7 +100,7 @@ $code.Add("} #close Test method`n")
 $code.Add("} #close class")
 
 #get external files and functions
-get-functionname -Path $resource.path |
+Get-FunctionName -Path $resource.path |
 Where-Object { $_ -notmatch "[(Get)|(Set)|(Test)]-TargetResource" } | ForEach-Object {
     #save each function to a file
     $code.Add( $(Get-DSCHelperFunction -Path $resource.path -Name $_))

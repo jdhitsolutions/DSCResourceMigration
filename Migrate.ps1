@@ -9,14 +9,14 @@
 
 Param(
     [Parameter(Mandatory, HelpMessage = "The name of the DSC Resource")]
-    [string]$Name,
+    [String]$Name,
     [Parameter(Mandatory, HelpMessage = "The name of the module for the DSC resource. Use fully-qualified name to specify a version.")]
     [object]$Module,
     [Parameter(Mandatory, HelpMessage = "The destination path for the new module, including the new module name.")]
-    [string]$DestinationPath,
+    [String]$DestinationPath,
     [version]$NewVersion = "0.1.0"
 )
-Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
+Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 
 #Create new directory structure
 Write-Verbose "Creating a module structure $DestinationPath"
@@ -39,7 +39,7 @@ Write-Verbose "Converting MOF for $name from to Class"
 $newName = Split-Path -Path $DestinationPath -Leaf
 $rootModule = Join-Path -Path $DestinationPath -ChildPath "$newname.psm1"
 #get the source module root path to check for supporting modules
-if ($module -is [string]) {
+if ($module -is [String]) {
     $modroot = Get-Module -name $Module -ListAvailable | Split-Path
 }
 else {
@@ -55,7 +55,7 @@ Write-Verbose "Getting non-TargetResource code"
 #this could be turned into a function
 $resource = Get-DscResource -Name $Name -Module $module | Select-Object -First 1
 $ast = Get-AST -path $resource.path
-$found = $ast.findall({ $args[0] -is [System.Management.Automation.Language.Ast] }, $true)
+$found = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.Ast] }, $true)
 $h = $found | Group-Object { $_.GetType().Name } -AsHashTable -AsString
 
 $other = $h["NamedBlockAST"][0].statements |
@@ -80,7 +80,7 @@ $other | Where-Object { $_.extent.text -notmatch "Export-ModuleMember|function" 
 #dot source functions
 @"
 #dot source supporting functions
-Get-ChildItem `$PSscriptroot\functions\*.ps1 | Foreach-Object { . .`$_.fullname}
+Get-ChildItem `$PSScriptRoot\functions\*.ps1 | ForEach-Object { . .`$_.FullName}
 
 "@ | Out-File -FilePath $rootModule -Append
 
@@ -98,7 +98,7 @@ if (Test-Path "$modroot\modules" ) {
 
 #create a copy of the original schema.mof
 Write-Verbose "Creating a copy of the original schema.mof"
-$mofPath = Get-SchemaMofPath -name $Name -module $module
-Copy-Item -Path $mofPath -Destination $DestinationPath
+$MofPath = Get-SchemaMofPath -name $Name -module $module
+Copy-Item -Path $MofPath -Destination $DestinationPath
 
 Write-Verbose "Migration complete. Open $DestinationPath in your editor to continue."

@@ -8,15 +8,15 @@ Import-Module PSDesiredStateConfiguration -RequiredVersion 2.0.5
 
 $resource = Get-DscResource -Name xhotfix -Module xwindowsUpdate
 $parent = Split-Path $resource.Path
-$mofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
+$MofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
 
 [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::Initialize()
 # This requires v2.0.5 of PSDesiredStateConfiguration
-$mofSchemas = [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::ReadCimSchemaMof($mofPath)
+$mofSchemas = [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::ReadCimSchemaMof($MofPath)
 
 #There may be multiple schemas so select the correct one. But how?
-$mofSchema = $mofSchemas.where({$_.cimclassname -eq $resource.ResourceType})
-$classname = $mofSchema.cimclassname
+$mofSchema = $mofSchemas.where({$_.cimClassName -eq $resource.ResourceType})
+$ClassName = $mofSchema.cimClassName
 $props = $mofSchema.CimClassProperties | Sort-Object -Property Qualifiers
 <#
 
@@ -94,9 +94,9 @@ ReferenceClassName : MSFT_Credential
 
 #>
 
-$definition = [system.collections.generic.list[string]]::new()
+$definition = [system.collections.generic.list[String]]::new()
 $definition.Add("[DSCResource()]")
-$definition.Add("Class $classname {")
+$definition.Add("Class $ClassName {")
 foreach ($p in $props) {
     Switch ($p.Qualifiers.name) {
         "key" { $definition.add("[DscProperty(Key)]") ; Break }
@@ -124,7 +124,7 @@ foreach ($p in $props) {
     $definition.add("[$propType]`$$($p.name)`n")
 }
 #add methods
-$definition.add("[$classname] Get() { }")
+$definition.add("[$ClassName] Get() { }")
 $definition.add("[void] Set() { }")
 $definition.add("[bool] Test() { }")
 

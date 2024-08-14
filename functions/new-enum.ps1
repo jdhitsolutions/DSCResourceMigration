@@ -1,20 +1,20 @@
 #create enums from the value map in schema.mof files
 
 Function New-DSCEnum {
-    [outputtype([String[]])]
+    [OutputType([String[]])]
     Param(
         [Parameter(ValueFromPipeline,Mandatory,HelpMessage = "Specify the path to the Schema.mof file.")]
         [ValidateScript({Test-Path $_})]
         [ValidateNotNullOrEmpty()]
-        [string]$Path
+        [String]$Path
     )
     Begin {
-        Write-Verbose "[$((Get-Date).TimeofDay) BEGIN  ] Starting $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) BEGIN  ] Starting $($MyInvocation.MyCommand)"
         [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::Initialize()
     } #begin
     Process {
-        Write-Verbose "[$((Get-Date).TimeofDay) PROCESS] Processing $Path "
-        $definition = [system.collections.generic.list[string]]::new()
+        Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Processing $Path "
+        $definition = [system.collections.generic.list[String]]::new()
         $mofSchemas = [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::ReadCimSchemaMof($Path)
         $maps = ($mofSchemas.cimclassproperties).where({ $_.qualifiers.name -eq 'ValueMap'})
         foreach ($item in $maps) {
@@ -25,6 +25,6 @@ Function New-DSCEnum {
         $definition
     } #process
     End {
-        Write-Verbose "[$((Get-Date).TimeofDay) END    ] Ending $($myinvocation.mycommand)"
+        Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
     } #nd
 }

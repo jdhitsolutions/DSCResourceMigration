@@ -4,25 +4,25 @@
 
 #convert a single resource
 
-[cmdletbinding()]
+[CmdletBinding()]
 Param(
-	[string]$Name = "xHotFix",
-	[string]$modulename = "xWindowsUpdate" 
-	)
+    [String]$Name = 'xHotFix',
+    [String]$ModuleName = 'xWindowsUpdate'
+)
 
-Import-Module $psscriptroot\DSCResourceMigration.psd1 -Force
+Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 Try {
-	Write-Verbose "Getting the most current version of DSC Resource $name"
-	$resource = Get-DscResource -Name $name -module $modulename -erroraction stop |
-	Sort-Object version -Descending | Select-Object -First 1
+    Write-Verbose "Getting the most current version of DSC Resource $name"
+    $resource = Get-DscResource -Name $name -Module $ModuleName -ErrorAction stop |
+    Sort-Object version -Descending | Select-Object -First 1
 }
 Catch {
-	Throw $_
+    Throw $_
 }
 
-$code = [System.Collections.Generic.list[string]]::New()
+$code = [System.Collections.Generic.list[String]]::New()
 $parent = Split-Path $resource.Path
-$mofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
+$MofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
 
 #how do we want to handle friendly name vs official class name?
 
@@ -30,34 +30,34 @@ $mofPath = Join-Path $parent -child "$($resource.ResourceType).schema.mof"
 #this could be used in the new module manifest
 $newversion = [version]::New($resource.Version.major + 1, 0, 0, 0)
 
-Write-Verbose "Getting non-TargetResource code"
+Write-Verbose 'Getting non-TargetResource code'
 #get all commands in the psm1 other than the Get/Set/Test functions
 $ast = Get-AST -path $resource.path
-$found = $ast.findall({ $args[0] -is [System.Management.Automation.Language.Ast] }, $true)
+$found = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.Ast] }, $true)
 $h = $found | Group-Object { $_.GetType().Name } -AsHashTable -AsString
 
-$other = $h["NamedBlockAST"][0].statements |
-Where-Object { $_.name -notmatch "[(get)|(set)|(test)]-TargetResource" } |
+$other = $h['NamedBlockAST'][0].statements |
+Where-Object { $_.name -notmatch '[(get)|(set)|(test)]-TargetResource' } |
 Select-Object extent
 
-$other | Where-Object { $_.extent.text -notmatch "Export-ModuleMember" } |
+$other | Where-Object { $_.extent.text -notmatch 'Export-ModuleMember' } |
 ForEach-Object {
-	$_.Extent.text | ForEach-Object { $code.Add($_) }
+    $_.Extent.text | ForEach-Object { $code.Add($_) }
 }
 
-Write-Verbose "Converting MOF from $mofpath"
-$Mof = Convert-Mof $mofpath
+Write-Verbose "Converting MOF from $MofPath"
+$Mof = Convert-Mof $MofPath
 
 # need to identify enums
 $mof.properties.where({ $_.valuemap }).foreach({
-		$code.Add("enum $($_.PropertyName) {")
-		Foreach ($v in $_.valuemap) {
-			$code.Add("  $($v)")
-		}
-		$code.add("}`n")
-	})
+        $code.Add("enum $($_.PropertyName) {")
+        Foreach ($v in $_.valuemap) {
+            $code.Add("  $($v)")
+        }
+        $code.add("}`n")
+    })
 
-$code.Add("[DSCResource()]")
+$code.Add('[DSCResource()]')
 $code.add("Class $($mof.name) {")
 
 #insert properties
@@ -71,25 +71,25 @@ ValueMap     : {}
 #>
 
 Foreach ($p in $mof.properties) {
-	Write-Verbose "Processing $($p.PropertyName)"
-	$dscProperty = $null
-	switch ($p.DSCType) {
-		"Key" { $dscProperty = "Key"; break }
-		"Required" { $dscProperty = "Mandatory"; break }
-		"Read" { $dscProperty = "NotConfigurable"; break }
-		"Default" { $dscProperty = "" }
-	}
-	$code.Add("[DscProperty($dscProperty)]")
+    Write-Verbose "Processing $($p.PropertyName)"
+    $dscProperty = $null
+    switch ($p.DSCType) {
+        'Key' { $dscProperty = 'Key'; break }
+        'Required' { $dscProperty = 'Mandatory'; break }
+        'Read' { $dscProperty = 'NotConfigurable'; break }
+        'Default' { $dscProperty = '' }
+    }
+    $code.Add("[DscProperty($dscProperty)]")
 
-	if ($p.ValueMap.count -gt 1) {
-		$ptype = "[$($p.PropertyName)]"
-	}
-	else {
-		$ptype = "[$($p.PropertyType)]"
-	}
-	#insert the description as a comment
-	$code.Add("# $($p.Description)")
-	$code.Add("  $ptype`$$($p.PropertyName)`n")
+    if ($p.ValueMap.count -gt 1) {
+        $pType = "[$($p.PropertyName)]"
+    }
+    else {
+        $pType = "[$($p.PropertyType)]"
+    }
+    #insert the description as a comment
+    $code.Add("# $($p.Description)")
+    $code.Add("  $pType`$$($p.PropertyName)`n")
 }
 
 #parse module file to get method code
@@ -100,34 +100,34 @@ $getFun = Get-DSCResourceFunction -Path $resource.path -Name Get-TargetResource
 $code.Add("[$($mof.name)] Get() {")
 $method = $getFun.Body
 foreach ($prop in $resource.properties) {
-	$method = Convert-VariableReference -VariableName $prop.name -CodeBlock $method
+    $method = Convert-VariableReference -VariableName $prop.name -CodeBlock $method
 }
 $code.Add($($method))
 $code.Add("} #close Get method`n")
 
 $setFun = Get-DSCResourceFunction -Path $resource.path -Name Set-TargetResource
-$code.Add("[void] Set() {")
+$code.Add('[void] Set() {')
 
 $method = $setFun.Body
 foreach ($prop in $resource.properties) {
-	$method = Convert-VariableReference -VariableName $prop.name -CodeBlock $method
+    $method = Convert-VariableReference -VariableName $prop.name -CodeBlock $method
 }
 $code.Add($($method))
 $code.Add("} #close Set method`n")
 
 $testFun = Get-DSCResourceFunction -Path $resource.path -Name Test-TargetResource
-$code.Add("[Bool] Test() {")
+$code.Add('[Bool] Test() {')
 $method = $testFun.Body
 foreach ($prop in $resource.properties) {
-	$method = Convert-VariableReference -VariableName $prop.name -CodeBlock $method
+    $method = Convert-VariableReference -VariableName $prop.name -CodeBlock $method
 }
 $code.Add($($method))
 $code.Add("} #close Test method`n")
 
-$code.Add("} #close class")
+$code.Add('} #close class')
 
 <# #get external files and functions
-get-functionname -Path $resource.path |
+Get-FunctionName -Path $resource.path |
 Where-Object { $_ -notmatch "[(Get)|(Set)|(Test)]-TargetResource" } | ForEach-Object {
     #save each function to a file
     $code.Add( $(Get-DSCHelperFunction -Path $resource.path -Name $_))
@@ -135,9 +135,9 @@ Where-Object { $_ -notmatch "[(Get)|(Set)|(Test)]-TargetResource" } | ForEach-Ob
 
 #insert mof
 $code.add("`n<#")
-$code.add("original schema.mof")
-Get-Content $mofpath | ForEach-Object { $code.add($_) }
-$code.add("#>")
+$code.add('original schema.mof')
+Get-Content $MofPath | ForEach-Object { $code.add($_) }
+$code.add('#>')
 
 $code
 
