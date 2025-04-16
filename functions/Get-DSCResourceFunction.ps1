@@ -1,25 +1,24 @@
-
 #export the Get/Set/Test script block from a DSC Resource function
 Function Get-DSCResourceFunction {
     [CmdletBinding()]
     Param(
         [Parameter(Position = 0, Mandatory, HelpMessage = "Specify the .ps1 or .psm1 file with defined functions.")]
         [ValidateScript({
-                If (Test-Path $_ ) {
+            If (Test-Path $_ ) {
+                $True
+                If ($_ -match "\.ps(m)?1$") {
                     $True
-                    If ($_ -match "\.ps(m)?1$") {
-                        $True
-                    }
-                    Else {
-                        Throw "The path must be to a .ps1 or .psm1 file."
-                        $False
-                    }
                 }
                 Else {
-                    Throw "Can't validate that $_ exists. Please verify and try again."
+                    Throw "The path must be to a .ps1 or .psm1 file."
                     $False
                 }
-            })]
+            }
+            Else {
+                Throw "Can't validate that $_ exists. Please verify and try again."
+                $False
+            }
+        })]
         [String]$Path,
         [Parameter(Mandatory, HelpMessage = "Specify a function by name")]
         [string[]]$Name
@@ -45,7 +44,6 @@ Function Get-DSCResourceFunction {
                 Parameters = ($functions[0].body.ParamBlock.parameters | ForEach-Object { "[$($_.statictype)]$($($_.name))" }) -join ','
                 Body       = $body
             }
-
         }
         else {
             Write-Warning "No matching functions found in $path"

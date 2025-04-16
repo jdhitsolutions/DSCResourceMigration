@@ -1,9 +1,21 @@
-Function New-ClassDefinition {
+Function New-DSCClassDefinition {
     [CmdletBinding()]
+    [OutputType("System.String")]
     Param(
-        [Parameter(ValueFromPipelineByPropertyName, Mandatory, HelpMessage = "Enter the DSC Resource name")]
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            HelpMessage = "Enter the DSC Resource name"
+        )]
+        [ValidateNotNullOrEmpty()]
         [String]$Name,
-        [Parameter(ValueFromPipelineByPropertyName, Mandatory, HelpMessage = "Enter the DSC module name for the resource")]
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            HelpMessage = "Enter the DSC module name for the resource"
+        )]
+        [ValidateNotNullOrEmpty()]
         [object]$Module
     )
     Begin {
@@ -83,4 +95,4 @@ Function New-ClassDefinition {
         Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
     } #end
 
-} #close New-ClassDefinition
+} #close New-DSCClassDefinition

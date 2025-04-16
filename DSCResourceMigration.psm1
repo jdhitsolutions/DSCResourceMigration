@@ -1,5 +1,5 @@
 
-Get-ChildItem -Path $PSScriptroot\functions |
+Get-ChildItem -Path $PSScriptRoot\functions |
 ForEach-Object {
     . $_.FullName
 }

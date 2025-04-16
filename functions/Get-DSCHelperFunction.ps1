@@ -1,4 +1,3 @@
-
 #export the script block from a DSC Resource function
 Function Get-DSCHelperFunction {
     [CmdletBinding()]
@@ -26,7 +25,6 @@ Function Get-DSCHelperFunction {
     )
     Begin {
         Write-Verbose "[$((Get-Date).TimeOfDay) BEGIN  ] Starting $($MyInvocation.MyCommand)"
-
     } #begin
 
     Process {
@@ -46,7 +44,6 @@ Function Get-DSCHelperFunction {
 
     End {
         Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
-
     } #end
 
 } #close

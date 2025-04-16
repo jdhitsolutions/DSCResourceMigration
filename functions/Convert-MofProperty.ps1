@@ -1,6 +1,5 @@
 #convert schema.mof properties to a class
 
-
 Function Convert-SchemaMofProperty {
     [CmdletBinding()]
     [OutputType([String[]])]

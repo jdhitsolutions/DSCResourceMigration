@@ -1,10 +1,10 @@
-#reauires -version 5.1
+#requires -version 5.1
 
 # A proof-of-concept script to migrate all resources from a MOF-based DSC module
 # to a class-based set of DSC resources. Each resource will be exported to a separate
 # file under a Classes folder.
 
-# .\Migrate-module.ps1 -Module xwindowsupdate -DestinationPath d:\temp\WindowsUpdateDsc
+# .\Migrate-module.ps1 -Module xWindowsUpdate -DestinationPath d:\temp\WindowsUpdateDsc
 
 Param(
     [Parameter(Mandatory, HelpMessage = "The name of the module for the DSC resource. Use fully-qualified name to specify a version.")]
@@ -17,22 +17,22 @@ Param(
 Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 
 $newName = Split-Path -Path $DestinationPath -Leaf
-$rootModule = Join-Path -Path $DestinationPath -ChildPath "$newname.psm1"
+$rootModule = Join-Path -Path $DestinationPath -ChildPath "$newName.psm1"
 
 #get the source module root path to check for supporting modules
 if ($module -is [String]) {
-    $modroot = Get-Module -Name $Module -ListAvailable -OutVariable mod | Split-Path
+    $modRoot = Get-Module -Name $Module -ListAvailable -OutVariable mod | Split-Path
 }
 else {
-    $modroot = Get-Module -FullyQualifiedName $Module -ListAvailable -OutVariable mod | Split-Path
+    $modRoot = Get-Module -FullyQualifiedName $Module -ListAvailable -OutVariable mod | Split-Path
 }
 
-if (-Not $modroot) {
+if (-Not $modRoot) {
     Throw "Failed to find the module."
     Return
 }
 else {
-    Write-Verbose "Using source module root $modroot"
+    Write-Verbose "Using source module root $modRoot"
 }
 
 #get DSCResources from the module
@@ -42,9 +42,9 @@ if ($import.DscResourcesToExport) {
     $resources = $import.DscResourcesToExport
 }
 else {
-    Write-Verbose "Checking for resources under $modroot"
-    if (Test-Path $modroot\DscResources ) {
-        $resources = (Get-ChildItem -Path $modroot\DscResources -ErrorAction stop).name
+    Write-Verbose "Checking for resources under $modRoot"
+    if (Test-Path $modRoot\DscResources ) {
+        $resources = (Get-ChildItem -Path $modRoot\DscResources -ErrorAction stop).name
     }
     else {
         Throw "Can't determine the location for the DSC Resource source files"
@@ -58,7 +58,7 @@ $subFolders = "docs", "en-us", "functions", "tests", "samples", "classes"
 if (-Not (Test-Path -Path $DestinationPath)) {
     [void](New-Item -ItemType Directory -Path $DestinationPath)
 }
-foreach ($sub in $subfolders) {
+foreach ($sub in $subFolders) {
     if (Test-Path (Join-Path -Path $DestinationPath -ChildPath $sub)) {
         Write-Verbose "Skipping $sub.name"
     }
@@ -68,10 +68,10 @@ foreach ($sub in $subfolders) {
 }
 
 #copy existing supporting modules if found
-Write-Verbose "Testing $modroot for a Modules folder"
-if (Test-Path "$modroot\modules" ) {
+Write-Verbose "Testing $modRoot for a Modules folder"
+if (Test-Path "$modRoot\modules" ) {
     Write-Verbose "Copying supporting modules"
-    Copy-Item -Path $modroot\modules -Destination $DestinationPath -Container -Force -Recurse
+    Copy-Item -Path $modRoot\modules -Destination $DestinationPath -Container -Force -Recurse
 }
 
 Write-Verbose "Creating $rootModule"
@@ -91,7 +91,7 @@ foreach ($Name in $Resources ) {
     $classFile = Join-Path -Path $classFolder.FullName -ChildPath "$name.ps1"
     $classFunctions = New-Item -Name functions -Path $classFolder.FullName -ItemType Directory -Force
 
-    New-ClassDefinition -name $name -module $module | Out-File -FilePath $classFile
+    New-DSCClassDefinition -name $name -module $module | Out-File -FilePath $classFile
 
     #export helper functions to individual files under .\functions
     Write-Verbose "Getting non-TargetResource code"
@@ -107,19 +107,19 @@ foreach ($Name in $Resources ) {
     Select-Object extent
 
     #export functions to separate files
-    $funs = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) |
+    $funcs = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) |
     Where-Object { $_.name -notmatch "targetResource" }
-    foreach ($fun in $funs) {
-        $fpath = Join-Path -Path $classFunctions.FullName -ChildPath "$($fun.name).ps1"
-        Write-Verbose "Exporting $fpath"
-        $fun.Extent.text | Out-File -FilePath $fpath -Force
+    foreach ($fun in $funcs) {
+        $fPath = Join-Path -Path $classFunctions.FullName -ChildPath "$($fun.name).ps1"
+        Write-Verbose "Exporting $fPath"
+        $fun.Extent.text | Out-File -FilePath $fPath -Force
     }
 
     Write-Verbose "Adding non-function code to the class file"
-    "`n# TODO: IF IMPORTING HELPER MODULES YOU MAY NEED TO FIX PATH REFERENCES" | Out-File -FilePath $classfile -Append
+    "`n# TODO: IF IMPORTING HELPER MODULES YOU MAY NEED TO FIX PATH REFERENCES" | Out-File -FilePath $classFile -Append
     $other | Where-Object { $_.extent.text -notmatch "Export-ModuleMember|function" } |
     ForEach-Object {
-        $_.Extent.text | Out-File -FilePath $classfile -Append
+        $_.Extent.text | Out-File -FilePath $classFile -Append
     }
 
     @"
@@ -127,23 +127,23 @@ foreach ($Name in $Resources ) {
 #dot source supporting functions
 Get-ChildItem `$PSScriptRoot\functions\*.ps1 | ForEach-Object { . `$_.FullName}
 
-"@ | Out-File -FilePath $classfile -Append
+"@ | Out-File -FilePath $classFile -Append
 
     #append  a copy of the original schema.mof to the new class .ps1 file
     Write-Verbose "Creating a copy of the original schema.mof"
     $MofPath = Get-SchemaMofPath -name $Name -module $module
     @"
 <#
-original shema.mof
+original schema.mof
 $( Get-Content -Path $MofPath | Out-String)
 #>
-"@  | Out-File -FilePath $classfile -Append
+"@  | Out-File -FilePath $classFile -Append
 
 } #foreach resource
 
 #create manifest
-$manifestPath = Join-Path -Path $DestinationPath -ChildPath "$newname.psd1"
-Write-Verbose "Creating manifest $manifestpath"
-New-ModuleManifest -Path $manifestPath -RootModule "$newname.psm1" -DscResourcesToExport $resources -ModuleVersion $newversion
+$manifestPath = Join-Path -Path $DestinationPath -ChildPath "$newName.psd1"
+Write-Verbose "Creating manifest $manifestPath"
+New-ModuleManifest -Path $manifestPath -RootModule "$newName.psm1" -DscResourcesToExport $resources -ModuleVersion $newversion
 
 Write-Host "Migration complete. Open $DestinationPath in your editor to continue." -ForegroundColor Green

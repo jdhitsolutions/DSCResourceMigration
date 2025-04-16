@@ -1,20 +1,19 @@
-
-#4th development pass
+#requires -version 5.1
 
 # Convert a single resource.
 # The output of this script file could be saved to a new .psm1 file
 
 [CmdletBinding()]
 Param(
-	[String]$Name = "xHotFix",
-	#Module parameter needs to support qualified name for versioning
-	[object]$Module = "xWindowsUpdate"
+    [String]$Name = "xHotFix",
+    #Module parameter needs to support qualified name for versioning
+    [object]$Module = "xWindowsUpdate"
 )
 
 Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 
 Write-Verbose "Converting MOF for $name from to Class"
-New-ClassDefinition -name $name -module $module
+New-DSCClassDefinition -name $name -module $module
 
 Write-Verbose "Getting non-TargetResource code"
 #get all commands in the psm1 other than the Get/Set/Test functions
@@ -25,13 +24,13 @@ $found = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.Ast]
 $h = $found | Group-Object { $_.GetType().Name } -AsHashTable -AsString
 
 $other = $h["NamedBlockAST"][0].statements |
-	Where-Object { $_.name -notmatch "[(get)|(set)|(test)]-TargetResource" } |
-	Select-Object extent
+    Where-Object { $_.name -notmatch "[(get)|(set)|(test)]-TargetResource" } |
+    Select-Object extent
 
 $other | Where-Object { $_.extent.text -notmatch "Export-ModuleMember" } |
-	ForEach-Object {
-		$_.Extent.text
-	}
+    ForEach-Object {
+        $_.Extent.text
+    }
 
 #append original mof
 # TODO: get matching definition when the mof might have multiple

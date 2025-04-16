@@ -1,4 +1,4 @@
-#reauires -version 5.1
+#requires -version 5.1
 
 # create a new class-based DSC module structure from
 # and existing MOF based DSC Resource
@@ -16,6 +16,7 @@ Param(
     [String]$DestinationPath,
     [version]$NewVersion = "0.1.0"
 )
+
 Import-Module $PSScriptRoot\DSCResourceMigration.psd1 -Force
 
 #Create new directory structure
@@ -25,7 +26,7 @@ $subFolders = "docs", "en-us", "functions", "tests", "samples"
 if (-Not (Test-Path -Path $DestinationPath)) {
     [void](New-Item -ItemType Directory -Path $DestinationPath)
 }
-foreach ($sub in $subfolders) {
+foreach ($sub in $subFolders) {
     if (Test-Path (Join-Path -Path $DestinationPath -ChildPath $sub)) {
         Write-Verbose "Skipping $sub.name"
     }
@@ -37,17 +38,17 @@ foreach ($sub in $subfolders) {
 #create psm1 with class definition
 Write-Verbose "Converting MOF for $name from to Class"
 $newName = Split-Path -Path $DestinationPath -Leaf
-$rootModule = Join-Path -Path $DestinationPath -ChildPath "$newname.psm1"
+$rootModule = Join-Path -Path $DestinationPath -ChildPath "$newName.psm1"
 #get the source module root path to check for supporting modules
 if ($module -is [String]) {
-    $modroot = Get-Module -name $Module -ListAvailable | Split-Path
+    $modRoot = Get-Module -name $Module -ListAvailable | Split-Path
 }
 else {
-    $modroot = Get-Module  -fullyqualifiedName $Module -ListAvailable | Split-Path
+    $modRoot = Get-Module -FullyQualifiedName $Module -ListAvailable | Split-Path
 }
 
 Write-Verbose "Creating $rootModule"
-New-ClassDefinition -name $name -module $module | Out-File -FilePath $rootModule
+New-DSCClassDefinition -name $name -module $module | Out-File -FilePath $rootModule
 
 #export helper functions to individual files under .\functions
 Write-Verbose "Getting non-TargetResource code"
@@ -63,12 +64,12 @@ $other = $h["NamedBlockAST"][0].statements |
     Select-Object extent
 
 #export functions to separate files
-$funs = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) |
+$funcs = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) |
     Where-Object { $_.name -notmatch "targetResource" }
-foreach ($fun in $funs) {
-    $fpath = Join-Path -Path $DestinationPath -ChildPath "functions\$($fun.name).ps1"
-    Write-Verbose "Exporting $fpath"
-    $fun.Extent.text | Out-File -FilePath $fpath -Force
+foreach ($fun in $funcs) {
+    $fPath = Join-Path -Path $DestinationPath -ChildPath "functions\$($fun.name).ps1"
+    Write-Verbose "Exporting $fPath"
+    $fun.Extent.text | Out-File -FilePath $fPath -Force
 }
 
 Write-Verbose "Adding non-function code to the psm1 file"
@@ -85,15 +86,15 @@ Get-ChildItem `$PSScriptRoot\functions\*.ps1 | ForEach-Object { . .`$_.FullName}
 "@ | Out-File -FilePath $rootModule -Append
 
 #create manifest
-$manifestPath = Join-Path -Path $DestinationPath -ChildPath "$newname.psd1"
-Write-Verbose "Creating manifest $manifestpath"
-New-ModuleManifest -Path $manifestPath -RootModule "$newname.psm1" -DscResourcesToExport $Name -ModuleVersion $newversion
+$manifestPath = Join-Path -Path $DestinationPath -ChildPath "$newName.psd1"
+Write-Verbose "Creating manifest $manifestPath"
+New-ModuleManifest -Path $manifestPath -RootModule "$newName.psm1" -DscResourcesToExport $Name -ModuleVersion $newversion
 
 #copy existing supporting modules if found
-Write-Verbose "Testing $modroot for a Modules folder"
-if (Test-Path "$modroot\modules" ) {
+Write-Verbose "Testing $modRoot for a Modules folder"
+if (Test-Path "$modRoot\modules" ) {
     Write-Verbose "Copying supporting modules"
-    Copy-Item -Path $modroot\modules -Destination $DestinationPath -Container -Force -Recurse
+    Copy-Item -Path $modRoot\modules -Destination $DestinationPath -Container -Force -Recurse
 }
 
 #create a copy of the original schema.mof

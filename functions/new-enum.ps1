@@ -1,6 +1,7 @@
 #create enums from the value map in schema.mof files
 
 Function New-DSCEnum {
+    [CmdletBinding()]
     [OutputType([String[]])]
     Param(
         [Parameter(ValueFromPipeline,Mandatory,HelpMessage = "Specify the path to the Schema.mof file.")]
@@ -16,7 +17,7 @@ Function New-DSCEnum {
         Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Processing $Path "
         $definition = [system.collections.generic.list[String]]::new()
         $mofSchemas = [Microsoft.PowerShell.DesiredStateConfiguration.Internal.DscClassCache]::ReadCimSchemaMof($Path)
-        $maps = ($mofSchemas.cimclassproperties).where({ $_.qualifiers.name -eq 'ValueMap'})
+        $maps = ($mofSchemas.cimClassProperties).where({ $_.qualifiers.name -eq 'ValueMap'})
         foreach ($item in $maps) {
             $definition.Add("enum $($item.name) {")
             $maps.Qualifiers.where({$_.name -eq "Values"}).Value.Foreach({$definition.Add($_)})

@@ -15,7 +15,7 @@ Function Get-SchemaMofPath {
     } #begin
 
     Process {
-        Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Getting Schema MOF path for $Name from $Module"
+        Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Getting schema MOF path for $Name from $Module"
         Try {
             if ($PSBoundParameters.ContainsKey("Content")) {
                 [void]($PSBoundParameters.Remove("Content"))
@@ -23,7 +23,6 @@ Function Get-SchemaMofPath {
             #only get the first result.
             $resource = Get-DscResource @PSBoundParameters -ErrorAction Stop | Select-Object -First 1
             if ($resource) {
-
                 Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Splitting $($resource.path)"
                 $parent = Split-Path $resource.Path
                 Write-Verbose "[$((Get-Date).TimeOfDay) PROCESS] Creating a mof path for $($resource.ResourceType)"

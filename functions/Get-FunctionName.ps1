@@ -10,22 +10,22 @@ Function Get-FunctionName {
             HelpMessage = "Specify the .ps1 or .psm1 file with defined functions."
         )]
         [ValidateScript({
-                If (Test-Path $_ ) {
+            If (Test-Path $_ ) {
+                $True
+                If ($_ -match "\.ps(m)?1$") {
                     $True
-                    If ($_ -match "\.ps(m)?1$") {
-                        $True
-                    }
-                    Else {
-                        Throw "The path must be to a .ps1 or .psm1 file."
-                        $False
-                    }
                 }
                 Else {
-                    Throw "Can't validate that $_ exists. Please verify and try again."
+                    Throw "The path must be to a .ps1 or .psm1 file."
                     $False
                 }
-            })]
-        [alias("pspath")]
+            }
+            Else {
+                Throw "Can't validate that $_ exists. Please verify and try again."
+                $False
+            }
+        })]
+        [alias("PSPath")]
         [String]$Path,
         [Parameter(HelpMessage = "List all detected function names.")]
         [Switch]$All,
