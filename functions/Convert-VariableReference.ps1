@@ -13,6 +13,7 @@ Function Convert-VariableReference {
         [ValidateNotNullOrEmpty()]
         [string[]]$CodeBlock
     )
+
     Write-Verbose "Updating references of `$$VariableName"
     $rx = "\`$(?=({)?$VariableName)"
 

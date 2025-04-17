@@ -24,11 +24,12 @@
         'Get-SchemaMofPath',
         'Convert-SchemaMofProperty',
         'New-DSCClassDefinition',
-        'New-DSCEnum'
+        'New-DSCEnum',
+        'Open-DSCResourceMigration'
     )
     CmdletsToExport      = ''
     VariablesToExport    = ''
-    AliasesToExport      = ''
+    AliasesToExport      = 'gfn'
     PrivateData          = @{
         PSData = @{
             Tags                       = @('DSC', 'DesiredStateConfiguration', 'DSCResource')

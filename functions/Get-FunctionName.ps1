@@ -29,7 +29,7 @@ Function Get-FunctionName {
         [String]$Path,
         [Parameter(HelpMessage = "List all detected function names.")]
         [Switch]$All,
-        [Parameter(HelpMessage = "Write a rich detailed object to the pipeline.")]
+        [Parameter(HelpMessage = "Write a rich object to the pipeline.")]
         [Switch]$Detailed
     )
 

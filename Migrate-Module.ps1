@@ -1,4 +1,4 @@
-#requires -version 5.1
+#requires -version 7.5
 
 # A proof-of-concept script to migrate all resources from a MOF-based DSC module
 # to a class-based set of DSC resources. Each resource will be exported to a separate
@@ -7,10 +7,22 @@
 # .\Migrate-module.ps1 -Module xWindowsUpdate -DestinationPath d:\temp\WindowsUpdateDsc
 
 Param(
-    [Parameter(Mandatory, HelpMessage = "The name of the module for the DSC resource. Use fully-qualified name to specify a version.")]
+    [Parameter(
+        Mandatory,
+        HelpMessage = "The name of the module for the DSC resource. Use fully-qualified name to specify a version."
+    )]
+    [ValidateNotNullOrEmpty()]
     [object]$Module,
-    [Parameter(Mandatory, HelpMessage = "The destination path for the new module, including the new module name.")]
+
+    [Parameter(
+        Mandatory,
+        HelpMessage = "The destination path for the new module, including the new module name."
+    )]
+    [ValidateNotNullOrEmpty()]
     [String]$DestinationPath,
+
+    [Parameter(HelpMessage = "Define a version number for the new resource module")]
+    [ValidateNotNullOrEmpty()]
     [version]$NewVersion = "0.1.0"
 )
 
@@ -141,7 +153,7 @@ $( Get-Content -Path $MofPath | Out-String)
 
 } #foreach resource
 
-#create manifest
+#create the module manifest
 $manifestPath = Join-Path -Path $DestinationPath -ChildPath "$newName.psd1"
 Write-Verbose "Creating manifest $manifestPath"
 New-ModuleManifest -Path $manifestPath -RootModule "$newName.psm1" -DscResourcesToExport $resources -ModuleVersion $newversion

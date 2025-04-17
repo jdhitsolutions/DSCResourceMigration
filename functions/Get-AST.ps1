@@ -1,6 +1,15 @@
 Function Get-AST {
     [CmdletBinding()]
-    Param([String]$Path)
+    Param(
+        [Parameter(
+            Position = 0,
+            Mandatory,
+            HelpMessage = "Enter the path to the file to be parsed."
+        )]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ Test-Path $_ })]
+        [String]$Path
+        )
 
     New-Variable astTokens -Force -WhatIf:$false
     New-Variable astErr -Force -WhatIf:$false

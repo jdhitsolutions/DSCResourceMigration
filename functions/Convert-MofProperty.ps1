@@ -4,7 +4,11 @@ Function Convert-SchemaMofProperty {
     [CmdletBinding()]
     [OutputType([String[]])]
     Param(
-        [Parameter(ValueFromPipeline, Mandatory, HelpMessage = 'Specify the path to the Schema.mof file.')]
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            HelpMessage = 'Specify the path to the Schema.mof file.'
+        )]
         [ValidateScript({ Test-Path $_ })]
         [ValidateNotNullOrEmpty()]
         [String]$Path
@@ -50,7 +54,6 @@ Function Convert-SchemaMofProperty {
                     'StringArray' { $PropType = 'String[]' }
                     Default { $PropType = $p.CimType }
                 }
-
             }
             $definition.add("[$PropType]`$$($p.name)`n")
         }

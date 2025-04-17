@@ -2,7 +2,11 @@
 Function Get-DSCResourceFunction {
     [CmdletBinding()]
     Param(
-        [Parameter(Position = 0, Mandatory, HelpMessage = "Specify the .ps1 or .psm1 file with defined functions.")]
+        [Parameter(
+            Position = 0,
+            Mandatory,
+            HelpMessage = "Specify the .ps1 or .psm1 file with defined functions."
+        )]
         [ValidateScript({
             If (Test-Path $_ ) {
                 $True
@@ -21,6 +25,7 @@ Function Get-DSCResourceFunction {
         })]
         [String]$Path,
         [Parameter(Mandatory, HelpMessage = "Specify a function by name")]
+        [ValidateNotNullOrEmpty()]
         [string[]]$Name
     )
     Begin {

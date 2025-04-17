@@ -1,19 +1,36 @@
-#requires -version 5.1
+#requires -version 7.5
 
 # create a new class-based DSC module structure from
 # and existing MOF based DSC Resource
 
 # .\Migrate.ps1 -Name timezone  -module @{ModuleName="computermanagementdsc";requiredVersion="8.5.0"} -DestinationPath d:\temp\xtimezone -Verbose
 # .\Migrate.ps1 -Name xhotfix -Module xwindowsupdate -DestinationPath d:\temp\xhot
-#  .\Migrate.ps1 -Name addomain  -module @{ModuleName="ActiveDirectorydsc";requiredVersion="6.2.0"} -DestinationPath d:\temp\xADDomain
+# .\Migrate.ps1 -Name addomain  -module @{ModuleName="ActiveDirectorydsc";requiredVersion="6.2.0"} -DestinationPath d:\temp\xADDomain
 
 Param(
-    [Parameter(Mandatory, HelpMessage = "The name of the DSC Resource")]
+    [Parameter(
+        Mandatory,
+        HelpMessage = "The name of the DSC Resource"
+    )]
+    [ValidateNotNullOrEmpty()]
     [String]$Name,
-    [Parameter(Mandatory, HelpMessage = "The name of the module for the DSC resource. Use fully-qualified name to specify a version.")]
+
+    [Parameter(
+        Mandatory,
+        HelpMessage = "The name of the module for the DSC resource. Use fully-qualified name to specify a version."
+    )]
+    [ValidateNotNullOrEmpty()]
     [object]$Module,
-    [Parameter(Mandatory, HelpMessage = "The destination path for the new module, including the new module name.")]
+
+    [Parameter(
+        Mandatory,
+        HelpMessage = "The destination path for the new module, including the new module name."
+    )]
+    [ValidateNotNullOrEmpty()]
     [String]$DestinationPath,
+
+    [Parameter(HelpMessage = "Define a version number for the new resource module")]
+    [ValidateNotNullOrEmpty()]
     [version]$NewVersion = "0.1.0"
 )
 

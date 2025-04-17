@@ -2,7 +2,7 @@
 
 [![PSGallery Version](https://img.shields.io/powershellgallery/v/DSCResourceMigration.png?style=for-the-badge&label=PowerShell%20Gallery)](https://www.powershellgallery.com/packages/DSCResourceMigration/) [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/DSCResourceMigration.png?style=for-the-badge&label=Downloads)](https://www.powershellgallery.com/packages/DSCResourceMigration/)
 
-This is a PowerShell module to help authors migrate __script-based__ DSC resources to class-based resources. The tooling in this module is __not__ designed as a completely hands-free experience. DSC Resource authors should consider the tools in this module as *accelerators* for the migration process.
+This is a PowerShell module to help authors migrate __script-based__ Desired State Configuration (DSC) resources to class-based resources. The tooling in this module is __not__ designed as a completely hands-free experience. DSC Resource authors should consider the tools in this module as *accelerators* for the migration process.
 
 __*The DSC Resource module to be converted must be installed on your computer*.__
 
@@ -30,7 +30,7 @@ The `DSCResourceMigration` module has a dependency on `@{ModuleName="PSDesiredSt
 
 ## Demonstration Code
 
-This module contains several demonstration migration scripts. These should be considered proof-of-concept. The scripts are intended to be run from the root of this module.
+This module contains several demonstration migration scripts. These should be considered proof-of-concept. The scripts are intended to be run from the root of this module. Run `[Open-DSCResourceMigration]` to change the working directory to the root of this module.
 
 ### Demo-MigrateResource.ps1
 

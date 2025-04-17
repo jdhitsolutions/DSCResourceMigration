@@ -1,11 +1,19 @@
-
-
 Function Get-SchemaMofPath {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory,HelpMessage = "Enter the DSC Resource name")]
+        [Parameter(
+            Mandatory,
+            ValueFromPipelineByPropertyName,
+            HelpMessage = "Enter the DSC Resource name"
+        )]
+        [ValidateNotNullOrEmpty()]
         [String]$Name,
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory,HelpMessage = "Enter the DSC module name for the resource")]
+        [Parameter(
+            ValueFromPipelineByPropertyName,
+            Mandatory,
+            HelpMessage = "Enter the DSC module name for the resource"
+        )]
+        [ValidateNotNullOrEmpty()]
         [object]$Module,
         [Parameter(HelpMessage = "Get the contents of the file instead of only the path.")]
         [Switch]$Content
@@ -48,7 +56,6 @@ Function Get-SchemaMofPath {
 
     End {
         Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
-
     } #end
 
 } #close Get-SchemaMofPath

@@ -339,7 +339,7 @@ $uri, $kbId = Test-StandardArguments -Path $this.Path -Id $this.Id
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-AST</maml:name>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>Path</maml:name>
           <maml:description>
             <maml:para>The path to the PowerShell script file.</maml:para>
@@ -354,7 +354,7 @@ $uri, $kbId = Test-StandardArguments -Path $this.Path -Id $this.Id
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>Path</maml:name>
         <maml:description>
           <maml:para>The path to the PowerShell script file.</maml:para>
@@ -1324,6 +1324,73 @@ Absent
       <maml:navigationLink>
         <maml:linkText>Online Version:</maml:linkText>
         <maml:uri>https://jdhitsolutions.com/yourls/0242f6</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Open-DSCResourceMigration</command:name>
+      <command:verb>Open</command:verb>
+      <command:noun>DSCResourceMigration</command:noun>
+      <maml:description>
+        <maml:para>Open the DSCResourceMigration location</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This is a simple command that will change location to the root of the DSCResource Migration module. The command will list the available demonstration scripts. You can review the project's README file and code samples.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Open-DSCResourceMigration</maml:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para>Learn more about PowerShell: http://jdhitsolutions.com/yourls/newsletter</maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; Open-DSCResourceMigration
+
+    Directory: C:\Program Files\PowerShell\Modules\DSCResourceMigration
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           4/16/2025  3:51 PM           1388 Demo-MigrateResource.ps1
+-a---           4/16/2025  6:46 PM           6269 Migrate-Module.ps1
+-a---           4/16/2025  6:46 PM           4809 Migrate.ps1</dev:code>
+        <dev:remarks>
+          <maml:para></maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Online Version:</maml:linkText>
+        <maml:uri>https://jdhitsolutions.com/yourls/c91ea1</maml:uri>
       </maml:navigationLink>
     </command:relatedLinks>
   </command:command>

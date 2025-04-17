@@ -4,7 +4,11 @@ Function New-DSCEnum {
     [CmdletBinding()]
     [OutputType([String[]])]
     Param(
-        [Parameter(ValueFromPipeline,Mandatory,HelpMessage = "Specify the path to the Schema.mof file.")]
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            HelpMessage = "Specify the path to the Schema.mof file."
+        )]
         [ValidateScript({Test-Path $_})]
         [ValidateNotNullOrEmpty()]
         [String]$Path
@@ -27,5 +31,5 @@ Function New-DSCEnum {
     } #process
     End {
         Write-Verbose "[$((Get-Date).TimeOfDay) END    ] Ending $($MyInvocation.MyCommand)"
-    } #nd
+    } #end
 }
