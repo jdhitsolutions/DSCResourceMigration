@@ -13,7 +13,7 @@ Code in this module should considered __proof-of-concept__ and as an SDK or fram
 Install this module from the PowerShell Gallery on the computer where you author DSC resources. This module requires PowerShell 7 and the latest version of the `PSDesiredStateConfiguration` module.
 
 ```powershell
-Install-PSResource -Name DSCResourceMigration -Force
+Install-PSResource -Name DSCResourceMigration 
 ```
 
 The `PSDesiredStateConfiguration` module will be installed as a dependency.
